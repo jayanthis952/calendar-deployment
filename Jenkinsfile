@@ -11,7 +11,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['tomcat-key']) {  // Jenkins credential ID for your private key
+                sshagent(['ubuntu']) {   // ✅ Jenkins credential ID for your private key
                     script {
                         // Deploy to Tomcat1
                         echo "Deploying to Tomcat1 (54.197.155.52)..."
