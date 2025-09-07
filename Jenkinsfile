@@ -1,10 +1,10 @@
 pipeline {
-    agent { label 'master' }
+    agent any
 
     stages {
         stage('Build') {
             steps {
-                echo "Downloading calendar.war..."
+                echo 'Downloading calendar.war...'
                 sh 'wget -O calendar.war https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war'
             }
         }
@@ -14,12 +14,12 @@ pipeline {
                 sshagent(['tomcat-key']) {
                     sh '''
                     echo "Deploying to Tomcat1 (18.232.151.172)..."
-                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@98.84.151.139:/tmp/
-                    ssh ubuntu@98.84.151.139 "sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo systemctl restart tomcat"
+                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@18.232.151.172:/opt/tomcat10/webapps/
+                    ssh -o StrictHostKeyChecking=no ubuntu@18.232.151.172 "sudo systemctl restart tomcat"
 
                     echo "Deploying to Tomcat2 (3.95.220.209)..."
-                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@34.228.19.124:/tmp/
-                    ssh ubuntu@34.228.19.124 "sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo systemctl restart tomcat"
+                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@3.95.220.209:/opt/tomcat10/webapps/
+                    ssh -o StrictHostKeyChecking=no ubuntu@3.95.220.209 "sudo systemctl restart tomcat"
                     '''
                 }
             }
