@@ -11,7 +11,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['ubuntu']) {
+                sshagent(['ubuntu']) {   // Use Jenkins credential ID
                     script {
                         // Deploy to Tomcat1
                         echo "Deploying to Tomcat1 (54.197.155.52)..."
@@ -24,7 +24,7 @@ pipeline {
                         echo "Deploying to Tomcat2 (100.25.217.178)..."
                         sh """
                         scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.25.217.178:/tmp/
-                        ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 'sudo mv /tmp/calendar.war /var/lib/tomcat10/webapps/ && sudo systemctl restart tomcat10'
+                        ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 'sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo systemctl restart tomcat10'
                         """
                     }
                 }
