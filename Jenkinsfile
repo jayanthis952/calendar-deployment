@@ -24,10 +24,10 @@ pipeline {
                         """
 
                         // Deploy to Tomcat2 (script-managed)
-                        echo "Deploying to Tomcat2 (100.25.217.178)..."
+                        echo "Deploying to Tomcat2 (100.27.187.254)..."
                         sh """
-                            scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.25.217.178:/tmp/
-                            ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 '
+                            scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.27.187.254:/tmp/
+                            ssh -o StrictHostKeyChecking=no ubuntu@100.27.187.254 '
                                 sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ &&
                                 sudo /opt/tomcat10/bin/shutdown.sh || true &&
                                 sudo /opt/tomcat10/bin/startup.sh
@@ -47,7 +47,7 @@ pipeline {
                     echo "Tomcat1 Response: ${response1}"
 
                     // Tomcat2
-                    def response2 = sh(script: "curl -Is http://100.25.217.178:8080/calendar/ | head -n 1", returnStdout: true).trim()
+                    def response2 = sh(script: "curl -Is http://100.27.187.254:8080/calendar/ | head -n 1", returnStdout: true).trim()
                     echo "Tomcat2 Response: ${response2}"
 
                     if (!response1.contains("200") || !response2.contains("200")) {
