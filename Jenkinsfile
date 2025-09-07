@@ -16,15 +16,22 @@ pipeline {
                         // Deploy to Tomcat1 (systemd-managed)
                         echo "Deploying to Tomcat1 (54.197.155.52)..."
                         sh """
-                        scp -o StrictHostKeyChecking=no calendar.war ubuntu@54.197.155.52:/tmp/
-                        ssh -o StrictHostKeyChecking=no ubuntu@54.197.155.52 'sudo mv /tmp/calendar.war /var/lib/tomcat10/webapps/ && sudo systemctl restart tomcat10'
+                            scp -o StrictHostKeyChecking=no calendar.war ubuntu@54.197.155.52:/tmp/
+                            ssh -o StrictHostKeyChecking=no ubuntu@54.197.155.52 '
+                                sudo mv /tmp/calendar.war /var/lib/tomcat10/webapps/ &&
+                                sudo systemctl restart tomcat10
+                            '
                         """
 
                         // Deploy to Tomcat2 (script-managed)
                         echo "Deploying to Tomcat2 (100.25.217.178)..."
                         sh """
-                        scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.25.217.178:/tmp/
-                        ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 'sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo /opt/tomcat10/bin/shutdown.sh || true && sudo /opt/tomcat10/bin/startup.sh'
+                            scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.25.217.178:/tmp/
+                            ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 '
+                                sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ &&
+                                sudo /opt/tomcat10/bin/shutdown.sh || true &&
+                                sudo /opt/tomcat10/bin/startup.sh
+                            '
                         """
                     }
                 }
@@ -34,8 +41,19 @@ pipeline {
         stage('Test') {
             steps {
                 echo "Testing deployments..."
-                sh 'curl -I http://54.197.155.52:8080/calendar/'
-                sh 'curl -I http://100.25.217.178:8080/calendar/'
+                script {
+                    // Tomcat1
+                    def response1 = sh(script: "curl -Is http://54.197.155.52:8080/calendar/ | head -n 1", returnStdout: true).trim()
+                    echo "Tomcat1 Response: ${response1}"
+
+                    // Tomcat2
+                    def response2 = sh(script: "curl -Is http://100.25.217.178:8080/calendar/ | head -n 1", returnStdout: true).trim()
+                    echo "Tomcat2 Response: ${response2}"
+
+                    if (!response1.contains("200") || !response2.contains("200")) {
+                        error("Deployment test failed on one or both servers!")
+                    }
+                }
             }
         }
     }
