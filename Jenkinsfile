@@ -11,16 +11,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['tomcat-key']) {
-                    sh '''
-                    echo "Deploying to Tomcat1 (54.90.147.170)..."
-                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@18.232.151.172:/opt/tomcat10/webapps/
-                    ssh -o StrictHostKeyChecking=no ubuntu@18.232.151.172 "sudo systemctl restart tomcat"
+                sshagent(['tomcat-key']) {  // Jenkins credential ID for your private key
+                    script {
+                        // Deploy to Tomcat1
+                        echo "Deploying to Tomcat1 (54.197.155.52)..."
+                        sh """
+                        scp -o StrictHostKeyChecking=no calendar.war ubuntu@54.197.155.52:/tmp/
+                        ssh -o StrictHostKeyChecking=no ubuntu@54.197.155.52 'sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo systemctl restart tomcat'
+                        """
 
-                    echo "Deploying to Tomcat2 (18.234.216.108)..."
-                    scp -o StrictHostKeyChecking=no calendar.war ubuntu@3.95.220.209:/opt/tomcat10/webapps/
-                    ssh -o StrictHostKeyChecking=no ubuntu@3.95.220.209 "sudo systemctl restart tomcat"
-                    '''
+                        // Deploy to Tomcat2
+                        echo "Deploying to Tomcat2 (100.25.217.178)..."
+                        sh """
+                        scp -o StrictHostKeyChecking=no calendar.war ubuntu@100.25.217.178:/tmp/
+                        ssh -o StrictHostKeyChecking=no ubuntu@100.25.217.178 'sudo mv /tmp/calendar.war /opt/tomcat10/webapps/ && sudo systemctl restart tomcat'
+                        """
+                    }
                 }
             }
         }
@@ -28,8 +34,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo "Testing deployments..."
-                sh 'curl -I http://54.90.147.170:8080/calendar/'
-                sh 'curl -I http://18.234.216.108:8080/calendar/'
+                sh 'curl -I http://54.197.155.52:8080/calendar/'
+                sh 'curl -I http://100.25.217.178:8080/calendar/'
             }
         }
     }
